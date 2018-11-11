@@ -1,4 +1,5 @@
-﻿using Electronica.States;
+﻿using Electronica.Input;
+using Electronica.States;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -8,23 +9,33 @@ namespace Electronica.Base
     /// <summary>
     /// This is the main type for your game.
     /// </summary>
-    public class Game1 : Game
+    public class Main : Game
     {
-        public static Game1 Instance { get; private set; }
+        /// <summary>
+        /// A global variable for the instance for easy access to GraphicsDeviceManagers, InputHandlers, etc.
+        /// </summary>
+        public static Main Instance { get; private set; }
 
         public GraphicsDeviceManager graphics;
         public SpriteBatch spriteBatch;
 
+        public MouseInputHander mouseInputHandler;
         private StateManager stateManager;
         
-        public Game1()
+        public Main()
         {
             Instance = this;
 
             graphics = new GraphicsDeviceManager(this);
+            graphics.PreferredBackBufferWidth = 1920;
+            graphics.PreferredBackBufferHeight = 1080;
+            graphics.ToggleFullScreen();
+
             Content.RootDirectory = "Content";
 
             Window.Title = "Electronica";
+
+            IsMouseVisible = true;         
         }
 
         /// <summary>
@@ -35,6 +46,8 @@ namespace Electronica.Base
         /// </summary>
         protected override void Initialize()
         {
+            mouseInputHandler = new MouseInputHander();
+            mouseInputHandler.SetAnchor(new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2));
 
             base.Initialize();
         }
@@ -70,6 +83,7 @@ namespace Electronica.Base
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+            mouseInputHandler.Update(gameTime);
             stateManager.Update(gameTime);
 
             base.Update(gameTime);

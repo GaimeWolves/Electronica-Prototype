@@ -13,7 +13,7 @@ namespace Electronica
         [STAThread]
         static void Main()
         {
-            using (var game = new Base.Game1())
+            using (var game = new Base.Main())
                 game.Run();
         }
     }

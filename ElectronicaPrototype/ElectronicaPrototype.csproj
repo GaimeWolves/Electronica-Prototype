@@ -47,7 +47,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="src\base\Game1.cs" />
+    <Compile Include="src\events\MouseMovedEventArgs.cs" />
+    <Compile Include="src\events\ScrollWheelMovedEventArgs.cs" />
     <Compile Include="src\graphics\output\Camera.cs" />
+    <Compile Include="src\input\camera\CameraInputMode.cs" />
+    <Compile Include="src\input\camera\FreeMovement.cs" />
+    <Compile Include="src\input\MouseInputHander.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="src\states\State.cs" />

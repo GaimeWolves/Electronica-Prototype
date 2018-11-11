@@ -8,6 +8,9 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Electronica.States
 {
+    /// <summary>
+    /// A manager class for easy managment of game states.
+    /// </summary>
     public class StateManager : IDisposable
     {
         public static State CurrentState { get; private set; }
@@ -20,9 +23,22 @@ namespace Electronica.States
             CurrentState.Initialize();
         }
 
+        /// <summary>
+        /// Updates the current active state.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public void Update(GameTime gameTime) => CurrentState.Update(gameTime);
+
+        /// <summary>
+        /// Draws the current active state.
+        /// </summary>
+        /// <param name="spriteBatch">The sprite batch to draw.</param>
         public void Draw(SpriteBatch spriteBatch) => CurrentState.Draw(spriteBatch);
 
+        /// <summary>
+        /// Disposes the old state and sets currentState to the new one.
+        /// </summary>
+        /// <param name="state">The new state.</param>
         public void SetState(State state)
         {
             CurrentState.Dispose();
@@ -34,10 +50,7 @@ namespace Electronica.States
         {
             if (!disposed)
             {
-                if (disposing)
-                {
-                    CurrentState.Dispose();
-                }
+                CurrentState.Dispose();
 
                 disposed = true;
             }

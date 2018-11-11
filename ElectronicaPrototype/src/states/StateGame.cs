@@ -19,7 +19,6 @@ namespace Electronica.States
         Texture2D normal;
 
         Matrix world;
-        float rotation;
 
         protected internal override void Initialize()
         {
@@ -27,26 +26,19 @@ namespace Electronica.States
             camera.Position = new Vector3(0, 0, -10);
             camera.Direction = new Vector3(0, 0, 1);
 
-            world = Matrix.CreateRotationY(rotation);
-
             LoadContent();
         }
 
         private protected override void LoadContent()
         {
-            model = Game1.Instance.Content.Load<Model>("moduleBattery/battery");
+            model = Main.Instance.Content.Load<Model>("moduleBattery/battery");
 
-            diffuse = Game1.Instance.Content.Load<Texture2D>("moduleBattery/diffuse");
-            normal = Game1.Instance.Content.Load<Texture2D>("moduleBattery/normals");
+            diffuse = Main.Instance.Content.Load<Texture2D>("moduleBattery/diffuse");
+            normal = Main.Instance.Content.Load<Texture2D>("moduleBattery/normals");
         }
 
         public override void Update(GameTime gameTime)
         {
-            rotation += (float) gameTime.ElapsedGameTime.TotalSeconds;
-
-            camera.Position = Vector3.Transform(camera.Position, Matrix.CreateRotationY(MathHelper.ToRadians(1f)));
-            camera.LookAt(Vector3.Zero);
-
             camera.Update(gameTime);
         }
 

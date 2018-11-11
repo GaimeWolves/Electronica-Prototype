@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Electronica.States
 {
+    /// <summary>
+    /// A base class for game states.
+    /// </summary>
     public abstract class State : IDisposable
     {
         public bool Disposed { get; private set; }
@@ -17,19 +20,18 @@ namespace Electronica.States
         private protected abstract void UnloadContent();
 
         ~State() => Dispose(false);
+
         protected virtual void Dispose(bool disposing)
         {
             if (!Disposed)
             {
                 if (disposing)
-                {
                     UnloadContent();
-                }
 
                 Disposed = true;
-
             }
         }
+
         public void Dispose()
         {
             Dispose(true);
