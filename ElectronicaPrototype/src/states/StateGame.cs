@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Electronica.Base;
+using Electronica.Circuits.Modules;
 using Electronica.Graphics.Output;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -20,6 +21,8 @@ namespace Electronica.States
 
         Matrix world;
 
+        Board board;
+
         protected internal override void Initialize()
         {
             camera = new Camera();
@@ -35,6 +38,8 @@ namespace Electronica.States
 
             diffuse = Main.Instance.Content.Load<Texture2D>("moduleBattery/diffuse");
             normal = Main.Instance.Content.Load<Texture2D>("moduleBattery/normals");
+
+            board = new Board();
         }
 
         public override void Update(GameTime gameTime)
@@ -44,15 +49,14 @@ namespace Electronica.States
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-
-            world = Matrix.CreateTranslation(-1, 0, 0);
+            world = Matrix.CreateTranslation(-1, 5, 0);
             foreach(ModelMesh mesh in model.Meshes)
             {
                 foreach (BasicEffect effect in mesh.Effects)
                 {
                     effect.EnableDefaultLighting();
 
-                    effect.AmbientLightColor = new Vector3(1f, 0, 0);
+                    effect.AmbientLightColor = new Vector3(0.5f, 0.5f, 0.5f);
                     effect.Projection = camera.ProjectionMatrix;
                     effect.View = camera.ViewMatrix;
                     effect.World = world;
@@ -63,14 +67,14 @@ namespace Electronica.States
                 mesh.Draw();
             }
 
-            world = Matrix.CreateTranslation(1, 0, 0);
+            world = Matrix.CreateTranslation(1, 5, 0);
             foreach (ModelMesh mesh in model.Meshes)
             {
                 foreach (BasicEffect effect in mesh.Effects)
                 {
                     effect.EnableDefaultLighting();
 
-                    effect.AmbientLightColor = new Vector3(1f, 0, 0);
+                    effect.AmbientLightColor = new Vector3(0.5f, 0.5f, 0.5f);
                     effect.Projection = camera.ProjectionMatrix;
                     effect.View = camera.ViewMatrix;
                     effect.World = world;
@@ -80,6 +84,9 @@ namespace Electronica.States
                 }
                 mesh.Draw();
             }
+
+            board.Draw(Main.Instance.graphics, camera.ProjectionMatrix, camera.ViewMatrix);
+
         }
 
         private protected override void UnloadContent()

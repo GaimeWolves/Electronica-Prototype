@@ -46,7 +46,10 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="src\base\Game1.cs" />
+    <Compile Include="src\base\Main.cs" />
+    <Compile Include="src\circuits\Circuit.cs" />
+    <Compile Include="src\circuits\modules\board\Board.cs" />
+    <Compile Include="src\circuits\modules\board\BoardCreator.cs" />
     <Compile Include="src\events\MouseMovedEventArgs.cs" />
     <Compile Include="src\events\ScrollWheelMovedEventArgs.cs" />
     <Compile Include="src\graphics\output\Camera.cs" />
@@ -62,6 +65,9 @@
   <ItemGroup>
     <Reference Include="MonoGame.Framework, Version=3.7.0.1708, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MonoGame.Framework.DesktopGL.3.7.0.1708\lib\net45\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Poly2Tri, Version=1.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Poly2Tri.1.0.1.0\lib\net35-Client\Poly2Tri.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
