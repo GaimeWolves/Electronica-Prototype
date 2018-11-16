@@ -1,4 +1,5 @@
-﻿using Electronica.Circuits.Modules;
+﻿using System;
+using Electronica.Circuits.Modules;
 using Electronica.Input;
 using Electronica.States;
 using Microsoft.Xna.Framework;
@@ -20,7 +21,9 @@ namespace Electronica.Base
         public GraphicsDeviceManager graphics;
         public SpriteBatch spriteBatch;
 
-        public MouseInputHander mouseInputHandler;
+        public MouseInputHander MouseInputHandler { get; private set; }
+        public KeyboardInputHandler KeyboardInputHandler { get; private set; }
+
         private StateManager stateManager;
 
         public Main()
@@ -28,9 +31,8 @@ namespace Electronica.Base
             Instance = this;
 
             graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = 1920;
-            graphics.PreferredBackBufferHeight = 1080;
-            graphics.ToggleFullScreen();
+            graphics.PreferredBackBufferWidth = 800;
+            graphics.PreferredBackBufferHeight = 600;
 
             Content.RootDirectory = "Content";
 
@@ -47,14 +49,8 @@ namespace Electronica.Base
         /// </summary>
         protected override void Initialize()
         {
-            mouseInputHandler = new MouseInputHander();
-            mouseInputHandler.SetAnchor(new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2));
-
-            RasterizerState rasterizer = new RasterizerState();
-            rasterizer.CullMode = CullMode.None;
-            //rasterizer.FillMode = FillMode.WireFrame;
-
-            GraphicsDevice.RasterizerState = rasterizer;
+            MouseInputHandler = new MouseInputHander();
+            KeyboardInputHandler = new KeyboardInputHandler();
 
             base.Initialize();
         }
@@ -90,7 +86,9 @@ namespace Electronica.Base
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            mouseInputHandler.Update(gameTime);
+            MouseInputHandler.Update(gameTime);
+            KeyboardInputHandler.Update();
+
             stateManager.Update(gameTime);
 
             base.Update(gameTime);

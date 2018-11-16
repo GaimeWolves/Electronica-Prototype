@@ -8,6 +8,7 @@ using Electronica.Circuits.Modules;
 using Electronica.Graphics.Output;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace Electronica.States
 {
@@ -27,7 +28,6 @@ namespace Electronica.States
         {
             camera = new Camera();
             camera.Position = new Vector3(0, 0, -10);
-            camera.Direction = new Vector3(0, 0, 1);
 
             LoadContent();
         }
@@ -45,6 +45,12 @@ namespace Electronica.States
         public override void Update(GameTime gameTime)
         {
             camera.Update(gameTime);
+
+            if (Main.Instance.KeyboardInputHandler.IsKeyJustPressed(Keys.Space))
+                Main.Instance.MouseInputHandler.SetAnchor(new Vector2(Main.Instance.GraphicsDevice.Viewport.Width / 2, Main.Instance.GraphicsDevice.Viewport.Height / 2));
+            else if (Main.Instance.KeyboardInputHandler.IsKeyJustReleased(Keys.Space))
+                Main.Instance.MouseInputHandler.ReleaseAnchor();
+
         }
 
         public override void Draw(SpriteBatch spriteBatch)

@@ -27,11 +27,11 @@ namespace Electronica.Circuits.Modules
     public static class BoardCreator
     {
         /// <summary>
-        /// This algorithm creates the mesh for convex circuit boards.
+        /// This algorithm creates the mesh for circuit boards.
         /// </summary>
         /// <param name="upperVertices">The list of points.</param>
         /// <param name="thickness">The thickness of the board.</param>
-        /// <returns></returns>
+        /// <returns>A mesh holding the created board.</returns>
         public static Mesh CreateBoard(List<Vector2> upperVertices, float thickness)
         {
             Polygon polygon = Triangulate(upperVertices);
@@ -61,6 +61,7 @@ namespace Electronica.Circuits.Modules
             List<short> indices = new List<short>();
             indices.AddRange(upperIndices);
             indices.AddRange(sideIndices);
+            lowerIndices.Reverse();
             indices.AddRange(lowerIndices);
 
             mesh.indices = indices.ToArray();
@@ -114,10 +115,10 @@ namespace Electronica.Circuits.Modules
         /// <returns>A list of indices.</returns>
         private static List<short> IndexLowerPlane(List<short> upperPlaneIndices, int vertexCount)
         {
-            List<short> lowerFaceIndices = new List<short>();
+            List<short> lowerFaceIndices = new List<short>(upperPlaneIndices);
 
-            for (short i = 0; i < vertexCount; i++)
-                lowerFaceIndices.Add((short)(upperPlaneIndices[i] + vertexCount));
+            for (int i = 0; i < lowerFaceIndices.Count; i++)
+                lowerFaceIndices[i] += (short)vertexCount;
 
             return lowerFaceIndices;
         }

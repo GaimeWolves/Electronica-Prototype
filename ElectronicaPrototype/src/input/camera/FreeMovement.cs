@@ -24,16 +24,24 @@ namespace Electronica.Input.CameraInput
     public sealed class FreeMovement : CameraInputMode
     {
         private float mRotationSpeed;
+        private Vector2 mRotationVelocity;
+        private float mRotationDecelleration;
+
         private float mTranslationSpeed;
         private Vector3 mTranslationVelocity;
-        private Vector2 mRotationVelocity;
+        private float mTranslationDecelleration;
+
         private float mZoomSpeed;
 
-        public FreeMovement(float rotationSpeed = 0.01f, float translationSpeed = 0.1f)
+        public FreeMovement(
+            float rotationSpeed = 0.01f, 
+            float translationSpeed = 0.1f,
+            float rotationDecelleration = 10, 
+            float translationDecelleration = 5
+            )
         {
-            currentTranslation = new CameraTranslation();
-            Main.Instance.mouseInputHandler.MouseMoved += OnMouseMovedEvent;
-            Main.Instance.mouseInputHandler.ScrollWheelMoved += OnScrollWheelMoved;
+            Main.Instance.MouseInputHandler.MouseMoved += OnMouseMovedEvent;
+            Main.Instance.MouseInputHandler.ScrollWheelMoved += OnScrollWheelMoved;
 
             mTranslationVelocity = new Vector3();
             mRotationVelocity = new Vector2();
@@ -41,25 +49,20 @@ namespace Electronica.Input.CameraInput
 
             mRotationSpeed = rotationSpeed;
             mTranslationSpeed = translationSpeed;
+
+            mTranslationDecelleration = translationDecelleration;
+            mRotationDecelleration = rotationDecelleration;
         }
 
         public override void Update(Camera camera, GameTime gameTime)
         {
-            currentTranslation.translation = Matrix.CreateTranslation(mTranslationVelocity.X, mTranslationVelocity.Y, mTranslationVelocity.Z);
-            currentTranslation.rotation = Matrix.CreateFromYawPitchRoll(mRotationVelocity.X, -mRotationVelocity.Y, 0f);
+            camera.Rotate(mRotationVelocity.X, -mRotationVelocity.Y);
+            camera.TranslateRelativeToYaw(mTranslationVelocity);
+            camera.TranslateOnDirectionAxis(mZoomSpeed);
 
-            camera.Direction = Vector3.Transform(camera.Direction, currentTranslation.rotation);
-
-            float angle = (float)Math.Atan2(camera.Direction.X, camera.Direction.Z);
-
-            camera.Position += Vector3.Transform(Vector3.Transform(camera.Position, currentTranslation.translation) - camera.Position, Matrix.CreateFromAxisAngle(Vector3.UnitY, angle)) + camera.Direction * mZoomSpeed;
-
-            currentTranslation.rotation = Matrix.CreateRotationY(0f);
-            currentTranslation.translation = Matrix.CreateTranslation(0f, 0f, 0f);
-
-            mTranslationVelocity *= 1f - (float)gameTime.ElapsedGameTime.TotalSeconds * 5;
-            mRotationVelocity *= 1f - (float)gameTime.ElapsedGameTime.TotalSeconds * 5;
-            mZoomSpeed *= 1f - (float)gameTime.ElapsedGameTime.TotalSeconds * 5;            
+            mTranslationVelocity *= 1f - (float)gameTime.ElapsedGameTime.TotalSeconds * mTranslationDecelleration;
+            mRotationVelocity *= 1f - (float)gameTime.ElapsedGameTime.TotalSeconds * mRotationDecelleration;
+            mZoomSpeed *= 1f - (float)gameTime.ElapsedGameTime.TotalSeconds * mTranslationDecelleration;            
         }
 
         private void OnMouseMovedEvent(object e, MouseMovedEventArgs args)

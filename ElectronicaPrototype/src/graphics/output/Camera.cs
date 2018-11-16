@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Electronica.Base;
 using Electronica.Input.CameraInput;
+using Electronica.Utils;
 
 namespace Electronica.Graphics.Output
 {
@@ -17,50 +18,89 @@ namespace Electronica.Graphics.Output
         public Matrix ProjectionMatrix { get; private set; }
         public Matrix ViewMatrix { get; private set; }
         public Vector3 Position { get; set; }
-        public Vector3 Direction { get; set; }
         public CameraInputMode InputMode { get; set; }
+
+        public Vector3 Direction
+        {
+            get => mDirection;
+            set => SetRotation(MathUtils.ConvertToEulerAngles(value));
+        }
+
+        private Vector3 mDirection;
+        private Vector3 mCameraUp;
 
         public Camera()
         {
             InputMode = CameraInputMode.FreeMovement;
+            Direction = Vector3.UnitZ;
+
+            SetProjection(MathHelper.PiOver4, 0.01f, 1000f);
         }
 
         public void Update(GameTime gameTime)
         {
             InputMode.Update(this, gameTime);
-            UpdateMatricies();            
+            UpdateViewMatrix();
         }
 
         /// <summary>
-        /// Generates the view and projection matrices.
+        /// Updates the view matrix.
         /// </summary>
-        private void UpdateMatricies()
-        {
-            ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45f), Main.Instance.graphics.GraphicsDevice.Viewport.AspectRatio, 1f, 1000f);
-            ViewMatrix = Matrix.CreateLookAt(Position, Position + Direction, Vector3.UnitY);
-        }
+        private void UpdateViewMatrix()
+            => ViewMatrix = Matrix.CreateLookAt(Position, Position + mDirection, mCameraUp);
+
+        /// <summary>
+        /// Sets the direction and up vector to the rotation.
+        /// </summary>
+        /// <param name="pitch">The pitch of the rotation.</param>
+        /// <param name="yaw">The yaw of the rotation.</param>
+        private void SetRotation(float pitch, float yaw)
+            => MathUtils.CreateCamera(pitch, yaw, out mDirection, out mCameraUp);
+
+        /// <summary>
+        /// Sets the direction and up vector to the rotation.
+        /// </summary>
+        /// <param name="rotation">The rotation vector.</param>
+        private void SetRotation(Vector2 rotation)
+            => MathUtils.CreateCamera(rotation.X, rotation.Y, out mDirection, out mCameraUp);
 
 
         /// <summary>
         /// Rotates the camera with Euler angles.
         /// </summary>
-        /// <param name="yaw">X angle</param>
-        /// <param name="pitch">Y angle</param>
-        /// <param name="roll">Z angle</param>
-        public void Rotate(float yaw, float pitch, float roll = 0) => Direction = Vector3.Transform(Direction, Matrix.CreateFromYawPitchRoll(yaw, pitch, roll));
+        /// <param name="dYaw">The change in yaw.</param>
+        /// <param name="dPitch">The change in pitch</param>
+        public void Rotate(float dYaw, float dPitch) 
+            => SetRotation(MathUtils.ConvertToEulerAngles(mDirection) + new Vector2(dPitch, dYaw));
 
         /// <summary>
-        /// Sets the rotation to an Euler angle.
+        /// Translates relative to the yaw angle (on the x-z plane).
         /// </summary>
-        /// <param name="yaw">X angle</param>
-        /// <param name="pitch">Y angle</param>
-        /// <param name="roll">Z angle</param>
-        public void SetRotation(float yaw, float pitch, float roll = 0) => Direction = Vector3.Transform(Vector3.UnitY, Matrix.CreateFromYawPitchRoll(yaw, pitch, roll));
+        /// <param name="translation">The translation vector.</param>
+        public void TranslateRelativeToYaw(Vector3 translation) 
+            => Position += Vector3.Transform(translation, Matrix.CreateFromAxisAngle(Vector3.UnitY, MathUtils.ConvertToEulerAngles(mDirection).Y));
 
         /// <summary>
-        /// Sets the direction to point to the target vector.
+        /// Translates the position by the direction vector.
+        /// </summary>
+        /// <param name="translation">The amount of translation.</param>
+        public void TranslateOnDirectionAxis(float translation) 
+            => Position += mDirection * translation;
+
+        /// <summary>
+        /// Updates the projection matrix with the new values.
+        /// </summary>
+        /// <param name="fov">The new field ov view.</param>
+        /// <param name="nearPlane">The new near clip plane.</param>
+        /// <param name="farPlane">The new far clip plane.</param>
+        public void SetProjection(float fov, float nearPlane, float farPlane) 
+            => ProjectionMatrix = Matrix.CreatePerspectiveFieldOfView(fov, Main.Instance.graphics.GraphicsDevice.Viewport.AspectRatio, nearPlane, farPlane);
+
+        /// <summary>
+        /// Rotates the camera towards the target.
         /// </summary>
         /// <param name="target">The target.</param>
-        public void LookAt(Vector3 target) => Direction = Vector3.Normalize(target - Position);
+        public void LookAt(Vector3 target) 
+            => (Direction = target - Position).Normalize();
     }
 }
