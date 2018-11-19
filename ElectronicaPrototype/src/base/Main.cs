@@ -1,10 +1,8 @@
-﻿using System;
-using Electronica.Circuits.Modules;
-using Electronica.Input;
+﻿using Electronica.Input;
 using Electronica.States;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 
 namespace Electronica.Base
 {
@@ -13,26 +11,20 @@ namespace Electronica.Base
     /// </summary>
     public class Main : Game
     {
-        /// <summary>
-        /// A global variable for the instance for easy access to GraphicsDeviceManagers, InputHandlers, etc.
-        /// </summary>
-        public static Main Instance { get; private set; }
+        private static Main mInstance;
 
-        public GraphicsDeviceManager graphics;
-        public SpriteBatch spriteBatch;
+        private GraphicsDeviceManager mGraphics;
+        private SpriteBatch mSpriteBatch;
 
-        public MouseInputHander MouseInputHandler { get; private set; }
-        public KeyboardInputHandler KeyboardInputHandler { get; private set; }
-
-        private StateManager stateManager;
+        private StateManager mStateManager;
 
         public Main()
         {
-            Instance = this;
+            mInstance = this;
 
-            graphics = new GraphicsDeviceManager(this);
-            graphics.PreferredBackBufferWidth = 800;
-            graphics.PreferredBackBufferHeight = 600;
+            mGraphics = new GraphicsDeviceManager(this);
+            mGraphics.PreferredBackBufferWidth = 800;
+            mGraphics.PreferredBackBufferHeight = 600;
 
             Content.RootDirectory = "Content";
 
@@ -49,9 +41,6 @@ namespace Electronica.Base
         /// </summary>
         protected override void Initialize()
         {
-            MouseInputHandler = new MouseInputHander();
-            KeyboardInputHandler = new KeyboardInputHandler();
-
             base.Initialize();
         }
 
@@ -61,9 +50,9 @@ namespace Electronica.Base
         /// </summary>
         protected override void LoadContent()
         {
-            spriteBatch = new SpriteBatch(GraphicsDevice);
+            mSpriteBatch = new SpriteBatch(GraphicsDevice);
 
-            stateManager = new StateManager(new StateGame());
+            mStateManager = new StateManager(new StateGame(), mGraphics);
         }
 
         /// <summary>
@@ -72,9 +61,9 @@ namespace Electronica.Base
         /// </summary>
         protected override void UnloadContent()
         {
-            stateManager.Dispose();
+            mStateManager.Dispose();
             Content.Unload();
-         }
+        }
 
         /// <summary>
         /// Allows the game to run logic such as updating the world,
@@ -83,13 +72,8 @@ namespace Electronica.Base
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            MouseInputHandler.Update(gameTime);
-            KeyboardInputHandler.Update();
-
-            stateManager.Update(gameTime);
+            InputHandler.Update(gameTime);
+            mStateManager.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -102,9 +86,14 @@ namespace Electronica.Base
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            stateManager.Draw(spriteBatch);
+            mStateManager.Draw(mSpriteBatch);
 
             base.Draw(gameTime);
         }
+
+        /// <summary>
+        /// Closes the game.
+        /// </summary>
+        public static void Close() => mInstance.Exit();
     }
 }

@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Electronica.Base;
+﻿using System.Collections.Generic;
+
+using Electronica.Graphics.Output;
+using Electronica.States;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -25,20 +24,19 @@ namespace Electronica.Circuits.Modules
 
         private BasicEffect basicEffect;
 
-        private Matrix translation;
-
         public Board()
         {
             vertices = new List<Vector2>();
             vertices.Add(new Vector2(-StandardBoardSize, -StandardBoardSize));
-            vertices.Add(new Vector2(-StandardBoardSize,  StandardBoardSize));
-            vertices.Add(new Vector2( StandardBoardSize,  StandardBoardSize));
-            vertices.Add(new Vector2( StandardBoardSize,  -StandardBoardSize));
+            vertices.Add(new Vector2(-StandardBoardSize, StandardBoardSize));
+            vertices.Add(new Vector2(-1, 1));
+            vertices.Add(new Vector2(1, 1));
+            vertices.Add(new Vector2(StandardBoardSize, StandardBoardSize));
+            vertices.Add(new Vector2(StandardBoardSize, -StandardBoardSize));
 
             UpdateBuffers();
 
-            basicEffect = new BasicEffect(Main.Instance.GraphicsDevice);
-            translation = Matrix.Identity;
+            basicEffect = new BasicEffect(StateManager.CurrentState.Graphics.GraphicsDevice);
         }
 
         /// <summary>
@@ -47,12 +45,12 @@ namespace Electronica.Circuits.Modules
         /// <param name="graphics">The current GraphicsDeviceManager.</param>
         /// <param name="projection">The projection matrix of the camera.</param>
         /// <param name="view">The view matrix of the camera.</param>
-        public void Draw(GraphicsDeviceManager graphics, Matrix projection, Matrix view)
+        public void Draw(GraphicsDeviceManager graphics, Camera camera, Matrix parentTransform)
         {
             basicEffect.EnableDefaultLighting();
-            basicEffect.World = translation;
-            basicEffect.View = view;
-            basicEffect.Projection = projection;
+            basicEffect.World = parentTransform;
+            basicEffect.View = camera.ViewMatrix;
+            basicEffect.Projection = camera.ProjectionMatrix;
             basicEffect.AmbientLightColor = new Vector3(0.5f, 0.5f, 0.5f);
             basicEffect.VertexColorEnabled = true;
 
@@ -75,10 +73,10 @@ namespace Electronica.Circuits.Modules
             vertexCount = mesh.vertices.Length;
             indexCount = mesh.indices.Length;
 
-            vertexBuffer = new VertexBuffer(Main.Instance.GraphicsDevice, VertexPositionColor.VertexDeclaration, vertexCount, BufferUsage.WriteOnly);
+            vertexBuffer = new VertexBuffer(StateManager.CurrentState.Graphics.GraphicsDevice, VertexPositionColor.VertexDeclaration, vertexCount, BufferUsage.WriteOnly);
             vertexBuffer.SetData(mesh.vertices);
 
-            indexBuffer = new IndexBuffer(Main.Instance.GraphicsDevice, typeof(short), indexCount, BufferUsage.WriteOnly);
+            indexBuffer = new IndexBuffer(StateManager.CurrentState.Graphics.GraphicsDevice, typeof(short), indexCount, BufferUsage.WriteOnly);
             indexBuffer.SetData(mesh.indices);
         }
     }

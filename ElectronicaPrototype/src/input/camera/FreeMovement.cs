@@ -1,24 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Electronica.Base;
-using Electronica.Events;
-using Electronica.Graphics.Output;
+﻿using Electronica.Graphics.Output;
+
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 
 namespace Electronica.Input.CameraInput
 {
     /// <summary>
     /// Camera movement logic for free movement.
-    /// 
+    ///
     /// Left click translates on X-Z plane.
     /// Right click rotates on X and Y axes.
     /// Middle click translates on X-Y plane.
     /// Scrollwheel translates on direction axis.
-    /// 
+    ///
     /// Translations happen relative to the directions X-Z plane.
     /// </summary>
     public sealed class FreeMovement : CameraInputMode
@@ -33,15 +26,9 @@ namespace Electronica.Input.CameraInput
 
         private float mZoomSpeed;
 
-        public FreeMovement(
-            float rotationSpeed = 0.01f, 
-            float translationSpeed = 0.1f,
-            float rotationDecelleration = 10, 
-            float translationDecelleration = 5
-            )
+        public FreeMovement(float rotationSpeed = 0.01f, float translationSpeed = 0.1f, float rotationDecelleration = 10, float translationDecelleration = 5)
         {
-            Main.Instance.MouseInputHandler.MouseMoved += OnMouseMovedEvent;
-            Main.Instance.MouseInputHandler.ScrollWheelMoved += OnScrollWheelMoved;
+            IsTargetedMovementMode = false;
 
             mTranslationVelocity = new Vector3();
             mRotationVelocity = new Vector2();
@@ -54,30 +41,31 @@ namespace Electronica.Input.CameraInput
             mRotationDecelleration = rotationDecelleration;
         }
 
-        public override void Update(Camera camera, GameTime gameTime)
+        private void HandleInput(float deltaTime)
         {
+            Vector2 delta = InputHandler.DeltaMousePosition;
+
+            if (InputHandler.IsMouseButtonPressed(MouseButton.Left))
+                mTranslationVelocity += new Vector3(delta.X, 0f, delta.Y) * mTranslationSpeed * deltaTime;
+            else if (InputHandler.IsMouseButtonPressed(MouseButton.Right))
+                mRotationVelocity += new Vector2(delta.X, delta.Y) * mRotationSpeed * deltaTime;
+            else if (InputHandler.IsMouseButtonPressed(MouseButton.Middle))
+                mTranslationVelocity += new Vector3(delta.X, delta.Y, 0) * mTranslationSpeed * deltaTime;
+
+            mZoomSpeed += InputHandler.DeltaScrollWheel * mTranslationSpeed * deltaTime;
+        }
+
+        public override void Update(Camera camera, float deltaTime)
+        {
+            HandleInput(deltaTime);
+
             camera.Rotate(mRotationVelocity.X, -mRotationVelocity.Y);
             camera.TranslateRelativeToYaw(mTranslationVelocity);
             camera.TranslateOnDirectionAxis(mZoomSpeed);
 
-            mTranslationVelocity *= 1f - (float)gameTime.ElapsedGameTime.TotalSeconds * mTranslationDecelleration;
-            mRotationVelocity *= 1f - (float)gameTime.ElapsedGameTime.TotalSeconds * mRotationDecelleration;
-            mZoomSpeed *= 1f - (float)gameTime.ElapsedGameTime.TotalSeconds * mTranslationDecelleration;            
-        }
-
-        private void OnMouseMovedEvent(object e, MouseMovedEventArgs args)
-        {
-            if (args.LeftButtonPressed)
-                mTranslationVelocity += new Vector3(args.Speed.X, 0f, args.Speed.Y) * mTranslationSpeed;
-            else if (args.RightButtonPressed)
-                mRotationVelocity += new Vector2(args.Speed.X, args.Speed.Y) * mRotationSpeed;
-            else if (args.MiddleButtonPressed)
-                mTranslationVelocity += new Vector3(args.Speed.X, args.Speed.Y, 0) * mTranslationSpeed;
-        }
-
-        private void OnScrollWheelMoved(object e, ScrollWheelMovedEventArgs args)
-        {
-            mZoomSpeed += args.Speed * mTranslationSpeed;
+            mTranslationVelocity *= 1f - deltaTime * mTranslationDecelleration;
+            mRotationVelocity *= 1f - deltaTime * mRotationDecelleration;
+            mZoomSpeed *= 1f - deltaTime * mTranslationDecelleration;
         }
     }
 }

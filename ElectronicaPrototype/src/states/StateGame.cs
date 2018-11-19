@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Electronica.Base;
-using Electronica.Circuits.Modules;
+﻿using Electronica.Base;
+using Electronica.Circuits;
 using Electronica.Graphics.Output;
+using Electronica.Input;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -14,85 +11,49 @@ namespace Electronica.States
 {
     public sealed class StateGame : State
     {
-        Camera camera;
+        private Camera mCamera;
+        private CircuitHandler mCircuitHandler;
 
-        Model model;
-        Texture2D diffuse;
-        Texture2D normal;
-
-        Matrix world;
-
-        Board board;
-
-        protected internal override void Initialize()
+        protected internal override void Initialize(GraphicsDeviceManager graphics)
         {
-            camera = new Camera();
-            camera.Position = new Vector3(0, 0, -10);
+            Graphics = graphics;
+
+            mCamera = new Camera();
+            mCamera.Position = new Vector3(0, 5, -10);
+            mCamera.Direction = new Vector3(0, -3.5f, 5);
 
             LoadContent();
         }
 
         private protected override void LoadContent()
         {
-            model = Main.Instance.Content.Load<Model>("moduleBattery/battery");
-
-            diffuse = Main.Instance.Content.Load<Texture2D>("moduleBattery/diffuse");
-            normal = Main.Instance.Content.Load<Texture2D>("moduleBattery/normals");
-
-            board = new Board();
+            mCircuitHandler = new CircuitHandler();
         }
 
-        public override void Update(GameTime gameTime)
+        private void HandleInput(GameTime gameTime, float deltaTime)
         {
-            camera.Update(gameTime);
+            if (InputHandler.IsKeyJustPressed(Keys.Escape))
+                Main.Close();
 
-            if (Main.Instance.KeyboardInputHandler.IsKeyJustPressed(Keys.Space))
-                Main.Instance.MouseInputHandler.SetAnchor(new Vector2(Main.Instance.GraphicsDevice.Viewport.Width / 2, Main.Instance.GraphicsDevice.Viewport.Height / 2));
-            else if (Main.Instance.KeyboardInputHandler.IsKeyJustReleased(Keys.Space))
-                Main.Instance.MouseInputHandler.ReleaseAnchor();
+            if (InputHandler.IsKeyJustPressed(Keys.Space))
+                if (InputHandler.IsMouseAnchored())
+                    InputHandler.ReleaseAnchor();
+                else
+                    InputHandler.SetAnchor(Graphics.GraphicsDevice.Viewport.Width / 2, Graphics.GraphicsDevice.Viewport.Height / 2);
 
+            mCircuitHandler.HandleInput(mCamera, deltaTime);
+        }
+
+        public override void Update(GameTime gameTime, float deltaTime)
+        {
+            HandleInput(gameTime, deltaTime);
+
+            mCamera.Update(deltaTime);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            world = Matrix.CreateTranslation(-1, 5, 0);
-            foreach(ModelMesh mesh in model.Meshes)
-            {
-                foreach (BasicEffect effect in mesh.Effects)
-                {
-                    effect.EnableDefaultLighting();
-
-                    effect.AmbientLightColor = new Vector3(0.5f, 0.5f, 0.5f);
-                    effect.Projection = camera.ProjectionMatrix;
-                    effect.View = camera.ViewMatrix;
-                    effect.World = world;
-
-                    effect.TextureEnabled = true;
-                    effect.Texture = diffuse;
-                }
-                mesh.Draw();
-            }
-
-            world = Matrix.CreateTranslation(1, 5, 0);
-            foreach (ModelMesh mesh in model.Meshes)
-            {
-                foreach (BasicEffect effect in mesh.Effects)
-                {
-                    effect.EnableDefaultLighting();
-
-                    effect.AmbientLightColor = new Vector3(0.5f, 0.5f, 0.5f);
-                    effect.Projection = camera.ProjectionMatrix;
-                    effect.View = camera.ViewMatrix;
-                    effect.World = world;
-
-                    effect.TextureEnabled = true;
-                    effect.Texture = diffuse;
-                }
-                mesh.Draw();
-            }
-
-            board.Draw(Main.Instance.graphics, camera.ProjectionMatrix, camera.ViewMatrix);
-
+            mCircuitHandler.Draw(Graphics, mCamera);
         }
 
         private protected override void UnloadContent()
@@ -103,7 +64,7 @@ namespace Electronica.States
         {
             if (!Disposed)
             {
-                //Delete unmanaged resources 
+                //Delete unmanaged resources
 
                 base.Dispose(disposing);
             }
