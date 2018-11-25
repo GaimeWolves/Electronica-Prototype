@@ -10,6 +10,55 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:..\..\XMLSchemes\bin\Release\XMLSchemes.dll
 
 #---------------------------------- Content ---------------------------------#
+
+#begin modules/logic/AND/model.fbx
+/importer:FbxImporter
+/processor:ModelProcessor
+/processorParam:ColorKeyColor=0,0,0,0
+/processorParam:ColorKeyEnabled=True
+/processorParam:DefaultEffect=BasicEffect
+/processorParam:GenerateMipmaps=True
+/processorParam:GenerateTangentFrames=False
+/processorParam:PremultiplyTextureAlpha=True
+/processorParam:PremultiplyVertexColors=True
+/processorParam:ResizeTexturesToPowerOfTwo=False
+/processorParam:RotationX=-90
+/processorParam:RotationY=0
+/processorParam:RotationZ=0
+/processorParam:Scale=1
+/processorParam:SwapWindingOrder=False
+/processorParam:TextureFormat=Compressed
+/build:modules/logic/AND/model.fbx
+
+#begin modules/logic/AND/settings.xml
+/importer:XmlImporter
+/processor:PassThroughProcessor
+/build:modules/logic/AND/settings.xml
+
+#begin modules/timing/NE555/model.fbx
+/importer:FbxImporter
+/processor:ModelProcessor
+/processorParam:ColorKeyColor=0,0,0,0
+/processorParam:ColorKeyEnabled=True
+/processorParam:DefaultEffect=BasicEffect
+/processorParam:GenerateMipmaps=True
+/processorParam:GenerateTangentFrames=False
+/processorParam:PremultiplyTextureAlpha=True
+/processorParam:PremultiplyVertexColors=True
+/processorParam:ResizeTexturesToPowerOfTwo=False
+/processorParam:RotationX=0
+/processorParam:RotationY=0
+/processorParam:RotationZ=0
+/processorParam:Scale=1
+/processorParam:SwapWindingOrder=False
+/processorParam:TextureFormat=Compressed
+/build:modules/timing/NE555/model.fbx
+
+#begin modules/timing/NE555/settings.xml
+/importer:XmlImporter
+/processor:PassThroughProcessor
+/build:modules/timing/NE555/settings.xml
 

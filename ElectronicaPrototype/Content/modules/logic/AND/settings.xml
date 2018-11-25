@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XnaContent>
+  <Asset Type="XMLSchemes.ModuleSettings">
+    <name>AND</name>
+    <type>IC</type>
+    <workshop>link</workshop>
+    <author>
+      <name>GameWolves</name>
+      <steampage>link</steampage>
+    </author>
+    <description>The most commonly used timing IC.</description>
+    <offset>0 0.6 0</offset>
+    <pins>
+      <Item>
+        <id>1</id>
+        <inverted>false</inverted>
+        <name>GND</name>
+        <offset>0 1 0</offset>
+      </Item>
+      <Item>
+        <id>2</id>
+        <inverted>false</inverted>
+        <name>VCC</name>
+        <offset>0 0 1</offset>
+      </Item>
+    </pins>
+  </Asset>
+</XnaContent>

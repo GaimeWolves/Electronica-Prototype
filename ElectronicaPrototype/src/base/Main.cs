@@ -11,16 +11,16 @@ namespace Electronica.Base
     /// </summary>
     public class Main : Game
     {
-        private static Main mInstance;
+        public static Main Instance;
 
-        private GraphicsDeviceManager mGraphics;
+        public GraphicsDeviceManager mGraphics;
         private SpriteBatch mSpriteBatch;
 
         private StateManager mStateManager;
 
         public Main()
         {
-            mInstance = this;
+            Instance = this;
 
             mGraphics = new GraphicsDeviceManager(this);
             mGraphics.PreferredBackBufferWidth = 800;
@@ -41,6 +41,7 @@ namespace Electronica.Base
         /// </summary>
         protected override void Initialize()
         {
+            InputHandler.Initialize();
             base.Initialize();
         }
 
@@ -94,6 +95,6 @@ namespace Electronica.Base
         /// <summary>
         /// Closes the game.
         /// </summary>
-        public static void Close() => mInstance.Exit();
+        public static void Close() => Instance.Exit();
     }
 }

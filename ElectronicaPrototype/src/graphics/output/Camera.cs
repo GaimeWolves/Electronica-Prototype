@@ -27,7 +27,7 @@ namespace Electronica.Graphics.Output
 
         public Camera()
         {
-            InputMode = CameraInputMode.FreeMovement;
+            InputMode = new FreeMovement();
             Direction = Vector3.UnitZ;
 
             SetProjection(MathHelper.PiOver4, 0.01f, 1000f);

@@ -5,6 +5,7 @@ using Electronica.States;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Poly2Tri.Triangulation.Polygon;
 
 namespace Electronica.Circuits.Modules
 {
@@ -13,30 +14,32 @@ namespace Electronica.Circuits.Modules
         private static readonly float StandardBoardSize = 5;
         private static readonly float StandardThickness = 0.1f;
 
+        public float Thickness { get; private set; }
+
         /// <summary>
         /// !Ordered! list of vertices
         /// </summary>
-        private List<Vector2> vertices;
+        private List<Vector2> mVertices;
 
-        private VertexBuffer vertexBuffer;
-        private IndexBuffer indexBuffer;
-        private int vertexCount, indexCount;
-
-        private BasicEffect basicEffect;
+        private VertexBuffer mVertexBuffer;
+        private IndexBuffer mIndexBuffer;
+        private int mVertexCount, mIndexCount;
+        private BasicEffect mBasicEffect;
+        private Polygon polygon;
 
         public Board()
         {
-            vertices = new List<Vector2>();
-            vertices.Add(new Vector2(-StandardBoardSize, -StandardBoardSize));
-            vertices.Add(new Vector2(-StandardBoardSize, StandardBoardSize));
-            vertices.Add(new Vector2(-1, 1));
-            vertices.Add(new Vector2(1, 1));
-            vertices.Add(new Vector2(StandardBoardSize, StandardBoardSize));
-            vertices.Add(new Vector2(StandardBoardSize, -StandardBoardSize));
+            Thickness = StandardThickness;
+
+            mVertices = new List<Vector2>(4);
+            mVertices.Add(new Vector2(-StandardBoardSize, -StandardBoardSize));
+            mVertices.Add(new Vector2(-StandardBoardSize, StandardBoardSize));
+            mVertices.Add(new Vector2(StandardBoardSize, StandardBoardSize));
+            mVertices.Add(new Vector2(StandardBoardSize, -StandardBoardSize));
 
             UpdateBuffers();
 
-            basicEffect = new BasicEffect(StateManager.CurrentState.Graphics.GraphicsDevice);
+            mBasicEffect = new BasicEffect(StateManager.CurrentState.Graphics.GraphicsDevice);
         }
 
         /// <summary>
@@ -47,20 +50,20 @@ namespace Electronica.Circuits.Modules
         /// <param name="view">The view matrix of the camera.</param>
         public void Draw(GraphicsDeviceManager graphics, Camera camera, Matrix parentTransform)
         {
-            basicEffect.EnableDefaultLighting();
-            basicEffect.World = parentTransform;
-            basicEffect.View = camera.ViewMatrix;
-            basicEffect.Projection = camera.ProjectionMatrix;
-            basicEffect.AmbientLightColor = new Vector3(0.5f, 0.5f, 0.5f);
-            basicEffect.VertexColorEnabled = true;
+            mBasicEffect.EnableDefaultLighting();
+            mBasicEffect.World = parentTransform;
+            mBasicEffect.View = camera.ViewMatrix;
+            mBasicEffect.Projection = camera.ProjectionMatrix;
+            mBasicEffect.AmbientLightColor = new Vector3(0.5f, 0.5f, 0.5f);
+            mBasicEffect.VertexColorEnabled = true;
 
-            graphics.GraphicsDevice.Indices = indexBuffer;
-            graphics.GraphicsDevice.SetVertexBuffer(vertexBuffer);
+            graphics.GraphicsDevice.Indices = mIndexBuffer;
+            graphics.GraphicsDevice.SetVertexBuffer(mVertexBuffer);
 
-            foreach (EffectPass pass in basicEffect.CurrentTechnique.Passes)
+            foreach (EffectPass pass in mBasicEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                graphics.GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, indexCount / 3);
+                graphics.GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, mIndexCount / 3);
             }
         }
 
@@ -69,15 +72,30 @@ namespace Electronica.Circuits.Modules
         /// </summary>
         private void UpdateBuffers()
         {
-            Mesh mesh = BoardCreator.CreateBoard(vertices, StandardThickness);
-            vertexCount = mesh.vertices.Length;
-            indexCount = mesh.indices.Length;
+            Mesh mesh = BoardCreator.CreateBoard(mVertices, Thickness);
+            mVertexCount = mesh.vertexArray.Length;
+            mIndexCount = mesh.indexArray.Length;
 
-            vertexBuffer = new VertexBuffer(StateManager.CurrentState.Graphics.GraphicsDevice, VertexPositionColor.VertexDeclaration, vertexCount, BufferUsage.WriteOnly);
-            vertexBuffer.SetData(mesh.vertices);
+            polygon = mesh.polygon;
 
-            indexBuffer = new IndexBuffer(StateManager.CurrentState.Graphics.GraphicsDevice, typeof(short), indexCount, BufferUsage.WriteOnly);
-            indexBuffer.SetData(mesh.indices);
+            mVertexBuffer = new VertexBuffer(StateManager.CurrentState.Graphics.GraphicsDevice, VertexPositionColor.VertexDeclaration, mVertexCount, BufferUsage.WriteOnly);
+            mVertexBuffer.SetData(mesh.vertexArray);
+
+            mIndexBuffer = new IndexBuffer(StateManager.CurrentState.Graphics.GraphicsDevice, typeof(short), mIndexCount, BufferUsage.WriteOnly);
+            mIndexBuffer.SetData(mesh.indexArray);
+        }
+
+        /// <summary>
+        /// Checks if a point is inside the board.
+        /// </summary>
+        /// <param name="point">The point to check.</param>
+        /// <returns>Is the point inside?</returns>
+        public bool IsPointInside(Vector3 point)
+        {
+            if (point.Y > 0 || point.Y < -Thickness)
+                return false;
+
+            return polygon.IsPointInside(new Poly2Tri.Triangulation.TriangulationPoint(point.X, point.Z));
         }
     }
 }

@@ -15,8 +15,9 @@ namespace Electronica.Circuits.Modules
     /// </summary>
     public struct Mesh
     {
-        public VertexPositionColor[] vertices;
-        public short[] indices;
+        public Polygon polygon;
+        public VertexPositionColor[] vertexArray;
+        public short[] indexArray;
     }
 
     /// <summary>
@@ -40,7 +41,7 @@ namespace Electronica.Circuits.Modules
 
             List<short> sideFacesIndices = IndexSides(upperVertices.Count);
 
-            return CreateMesh(upperFaceIndices, sideFacesIndices, lowerFaceIndices, upperVertices, lowerVertices);
+            return CreateMesh(upperFaceIndices, sideFacesIndices, lowerFaceIndices, upperVertices, lowerVertices, polygon);
         }
 
         /// <summary>
@@ -51,8 +52,9 @@ namespace Electronica.Circuits.Modules
         /// <param name="lowerIndices">The indices of the lower face.</param>
         /// <param name="upperVertices">The vertices of the upper face.</param>
         /// <param name="lowerVertices">The vertices of the lower face.</param>
+        /// <param name="polygon">The polygon for checking points etc.</param>
         /// <returns>The created mesh.</returns>
-        private static Mesh CreateMesh(List<short> upperIndices, List<short> sideIndices, List<short> lowerIndices, List<Vector2> upperVertices, List<Vector3> lowerVertices)
+        private static Mesh CreateMesh(List<short> upperIndices, List<short> sideIndices, List<short> lowerIndices, List<Vector2> upperVertices, List<Vector3> lowerVertices, Polygon polygon)
         {
             Mesh mesh = new Mesh();
 
@@ -62,7 +64,7 @@ namespace Electronica.Circuits.Modules
             lowerIndices.Reverse();
             indices.AddRange(lowerIndices);
 
-            mesh.indices = indices.ToArray();
+            mesh.indexArray = indices.ToArray();
 
             List<Vector3> vertices = new List<Vector3>();
 
@@ -76,7 +78,8 @@ namespace Electronica.Circuits.Modules
             for (int i = 0; i < vertices.Count; i++)
                 vertexArray[i] = new VertexPositionColor(vertices[i], Color.DarkGreen);
 
-            mesh.vertices = vertexArray;
+            mesh.vertexArray = vertexArray;
+            mesh.polygon = polygon;
 
             return mesh;
         }

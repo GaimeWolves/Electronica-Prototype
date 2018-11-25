@@ -1,8 +1,26 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Electronica.Graphics.Output;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace Electronica.Input
 {
+    public struct Drag
+    {
+        public Drag(Vector2 start)
+        {
+            this.start = start;
+            current = start;
+            end = null;
+        }
+
+        public Vector2 start;
+        public Vector2 current;
+        public Vector2? end;
+    }
+
     /// <summary>
     /// A list of mouse buttons.
     /// </summary>
@@ -29,16 +47,23 @@ namespace Electronica.Input
         private static Vector2 mMouseAnchor;
         private static bool mMouseAnchored;
 
+        private static Dictionary<MouseButton, Drag> mMouseDrags;
+
         /// <summary>
         /// Methods for polling current input states.
         /// </summary>
 
         #region InputPolling
 
+        public static bool FixedMousePosDrag { get; set; }
+
         public static Vector2 MousePosition { get; private set; }
         public static Vector2 DeltaMousePosition { get; private set; }
         public static float ScrollWheelPosition { get; private set; }
         public static float DeltaScrollWheel { get; private set; }
+
+        public static Vector3 WorldSpacePosition { get; private set; }
+        public static Vector3 WorldSpaceDirection { get; private set; }
 
         public static bool IsKeyPressed(Keys key) => mCurrentKeyboardState.IsKeyDown(key);
 
@@ -56,6 +81,14 @@ namespace Electronica.Input
 
         public static bool IsMouseAnchored() => mMouseAnchored;
 
+        public static Drag? GetDrag(MouseButton button)
+        {
+            if (mMouseDrags.TryGetValue(button, out Drag drag))
+                return drag;
+            else
+                return null;
+        }
+
         #endregion InputPolling
 
         /// <summary>
@@ -66,6 +99,22 @@ namespace Electronica.Input
         {
             mMouseAnchor = anchor;
             mMouseAnchored = true;
+        }
+
+        /// <summary>
+        /// Sets the mouse position.
+        /// </summary>
+        /// <param name="updateStates">Set the last mouse state to the set position so that the delta position is accurate.</param>
+        /// <param name="position">The position.</param>
+        public static void SetMousePosition(bool updateStates, Vector2 position)
+        {
+            Mouse.SetPosition((int)position.X, (int)position.Y);
+
+            if (updateStates)
+            {
+                mCurrentMouseState = Mouse.GetState();
+                mLastMouseState = mCurrentMouseState;
+            }
         }
 
         /// <summary>
@@ -93,6 +142,26 @@ namespace Electronica.Input
             mCurrentKeyboardState = Keyboard.GetState();
             mDoubleClickTimer = 0;
             mMouseAnchored = false;
+            mMouseDrags = new Dictionary<MouseButton, Drag>(Enum.GetValues(typeof(MouseButton)).Length);
+        }
+
+        /// <summary>
+        /// Projects the mouse position to world space.
+        /// </summary>
+        /// <param name="camera">The camera to unproject from.</param>
+        /// <param name="graphics">The <see cref="GraphicsDeviceManager"/>.</param>
+        public static void UpdateWorldSpace(Camera camera, GraphicsDeviceManager graphics)
+        {
+            Vector3 nearSource = new Vector3(MousePosition, 0f);
+            Vector3 farSource = new Vector3(MousePosition, 1f);
+            Vector3 nearPoint = graphics.GraphicsDevice.Viewport.Unproject(nearSource, camera.ProjectionMatrix, camera.ViewMatrix, Matrix.Identity);
+            Vector3 farPoint = graphics.GraphicsDevice.Viewport.Unproject(farSource, camera.ProjectionMatrix, camera.ViewMatrix, Matrix.Identity);
+
+            Vector3 direction = farPoint - nearPoint;
+            direction.Normalize();
+
+            WorldSpacePosition = nearPoint;
+            WorldSpaceDirection = direction;
         }
 
         public static void Update(GameTime gameTime)
@@ -117,6 +186,9 @@ namespace Electronica.Input
             }
 
             MousePosition = mCurrentMouseState.Position.ToVector2();
+
+            foreach (MouseButton button in Enum.GetValues(typeof(MouseButton)))
+                CheckDrag(button);
 
             if (mMouseAnchored)
                 DeltaMousePosition = mMouseAnchor - MousePosition;
@@ -150,6 +222,50 @@ namespace Electronica.Input
                     return state.MiddleButton == ButtonState.Pressed;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Updates the drag event of a specific button.
+        /// </summary>
+        /// <param name="button">The button to check.</param>
+        private static void CheckDrag(MouseButton button)
+        {
+            Drag drag;
+            bool hasValue;
+
+            if (hasValue = mMouseDrags.TryGetValue(button, out drag))
+            {
+                if (drag.end.HasValue)
+                {
+                    mMouseDrags.Remove(button);
+                    return;
+                }
+            }
+
+            if (IsMouseButtonPressed(button))
+            {
+                if (hasValue)
+                    drag.current = MousePosition;
+                else
+                {
+                    if (!IsMouseAnchored() && FixedMousePosDrag)
+                        SetAnchor(MousePosition);
+
+                    mMouseDrags.Add(button, new Drag(MousePosition));
+                }
+            }
+            else if (IsMouseButtonJustReleased(button))
+            {
+                if (hasValue)
+                {
+                    drag.end = MousePosition;
+                    if (drag.start == mMouseAnchor && FixedMousePosDrag)
+                        ReleaseAnchor();
+                }
+            }
+
+            if (hasValue)
+                mMouseDrags[button] = drag;
         }
     }
 }

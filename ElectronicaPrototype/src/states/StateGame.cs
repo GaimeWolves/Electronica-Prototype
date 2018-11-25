@@ -1,8 +1,9 @@
-﻿using Electronica.Base;
+﻿using System;
+using Electronica.Base;
 using Electronica.Circuits;
 using Electronica.Graphics.Output;
 using Electronica.Input;
-
+using Electronica.Input.CameraInput;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -13,6 +14,7 @@ namespace Electronica.States
     {
         private Camera mCamera;
         private CircuitHandler mCircuitHandler;
+        private CircuitInputHandler mInputHandler;
 
         protected internal override void Initialize(GraphicsDeviceManager graphics)
         {
@@ -28,31 +30,22 @@ namespace Electronica.States
         private protected override void LoadContent()
         {
             mCircuitHandler = new CircuitHandler();
-        }
-
-        private void HandleInput(GameTime gameTime, float deltaTime)
-        {
-            if (InputHandler.IsKeyJustPressed(Keys.Escape))
-                Main.Close();
-
-            if (InputHandler.IsKeyJustPressed(Keys.Space))
-                if (InputHandler.IsMouseAnchored())
-                    InputHandler.ReleaseAnchor();
-                else
-                    InputHandler.SetAnchor(Graphics.GraphicsDevice.Viewport.Width / 2, Graphics.GraphicsDevice.Viewport.Height / 2);
-
-            mCircuitHandler.HandleInput(mCamera, deltaTime);
+            mInputHandler = new CircuitInputHandler(mCamera, mCircuitHandler);
         }
 
         public override void Update(GameTime gameTime, float deltaTime)
         {
-            HandleInput(gameTime, deltaTime);
+            InputHandler.UpdateWorldSpace(mCamera, Graphics);
+            mInputHandler.HandleInput(gameTime, Graphics);
 
             mCamera.Update(deltaTime);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
+            if (mCamera.InputMode is KeyboardMovement)
+                mInputHandler.ModulePick.Draw(Graphics, mCamera);
+
             mCircuitHandler.Draw(Graphics, mCamera);
         }
 

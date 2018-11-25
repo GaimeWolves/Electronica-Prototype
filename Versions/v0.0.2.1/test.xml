@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Modules="Electronica.Circuits.Modules">
+  <Asset Type="Modules:ModuleSettings">
+    <name>NE555</name>
+    <type>IC</type>
+    <workshop>https:\\abcde.de</workshop>
+    <author>
+      <name>GameWolves</name>
+      <steampage>https:\\abcde.de</steampage>
+    </author>
+    <description>The most commonly 
+ used timing IC.</description>
+    <offset>0 0 0</offset>
+    <pins>
+      <Item>
+        <id>1</id>
+        <inverted>false</inverted>
+        <name>GND</name>
+        <offset>0 1 0</offset>
+      </Item>
+      <Item>
+        <id>2</id>
+        <inverted>false</inverted>
+        <name>VCC</name>
+        <offset>0 0 1</offset>
+      </Item>
+    </pins>
+  </Asset>
+</XnaContent>

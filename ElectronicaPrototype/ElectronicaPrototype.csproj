@@ -69,13 +69,19 @@
     <Compile Include="src\Circuits\CircuitHandler.cs" />
     <Compile Include="src\Circuits\Modules\Board\Board.cs" />
     <Compile Include="src\Circuits\Modules\Board\BoardCreator.cs" />
+    <Compile Include="src\Circuits\Modules\Logic\AND.cs" />
+    <Compile Include="src\Circuits\Modules\Module.cs" />
+    <Compile Include="src\Circuits\Modules\Timing\NE555.cs" />
     <Compile Include="src\Graphics\Output\Camera.cs" />
     <Compile Include="src\Input\Camera\CameraInputMode.cs" />
+    <Compile Include="src\Input\Camera\KeyboardMovement.cs" />
     <Compile Include="src\Input\Camera\TargetedMovement.cs" />
     <Compile Include="src\Input\Camera\FreeMovement.cs" />
+    <Compile Include="src\Input\CircuitInputHandler.cs" />
     <Compile Include="src\Input\InputHandler.cs" />
     <Compile Include="src\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="src\Raycast\Ray.cs" />
     <Compile Include="src\States\State.cs" />
     <Compile Include="src\States\StateGame.cs" />
     <Compile Include="src\States\StateManager.cs" />
@@ -150,6 +156,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XMLSchemes\XMLSchemes.csproj">
+      <Project>{7c879df0-e1ce-4190-bf1d-32033fa4e81e}</Project>
+      <Name>XMLSchemes</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\MonoGame\v3.0\MonoGame.Content.Builder.targets" />

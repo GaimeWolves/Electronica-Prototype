@@ -8,9 +8,6 @@ namespace Electronica.Input.CameraInput
     /// </summary>
     public abstract class CameraInputMode
     {
-        public static FreeMovement FreeMovement = new FreeMovement();
-        public static TargetedMovement TargetedMovement = new TargetedMovement();
-
         public bool IsTargetedMovementMode { get; protected set; }
 
         public abstract void Update(Camera camera, float deltaTime);
