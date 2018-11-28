@@ -145,5 +145,15 @@ namespace Electronica.Utils
             float roll = (float)Math.Sin(axisPosition.X) * rotation;
             return new Vector2(pitch, roll);
         }
+
+        /// <summary>
+        /// Scales the value to be in between 0 and 1. (0 = min, 1 = max).
+        /// </summary>
+        /// <param name="min">The minimal value of the dataset.</param>
+        /// <param name="max">The maximal value of the dataset.</param>
+        /// <param name="value">The value to normalize.</param>
+        /// <returns>The normalized value.</returns>
+        public static float NormalizeData(float min, float max, float value)
+            => (value - min) / (max - min);
     }
 }

@@ -15,8 +15,6 @@ namespace Electronica.States
 
         protected internal abstract void Initialize(GraphicsDeviceManager graphics);
 
-        private protected abstract void LoadContent();
-
         public abstract void Update(GameTime gameTime, float deltaTime);
 
         public abstract void Draw(Microsoft.Xna.Framework.Graphics.SpriteBatch spriteBatch);

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
-
+using Electronica.Base;
 using Electronica.Graphics.Output;
 using Electronica.States;
-
+using Electronica.Utils.VertexDeclarations;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Poly2Tri.Triangulation.Polygon;
 
@@ -13,6 +14,9 @@ namespace Electronica.Circuits.Modules
     {
         private static readonly float StandardBoardSize = 5;
         private static readonly float StandardThickness = 0.1f;
+
+        private static Effect mEffect;
+        private static Texture2D mBase, mWirering;
 
         public float Thickness { get; private set; }
 
@@ -24,8 +28,14 @@ namespace Electronica.Circuits.Modules
         private VertexBuffer mVertexBuffer;
         private IndexBuffer mIndexBuffer;
         private int mVertexCount, mIndexCount;
-        private BasicEffect mBasicEffect;
-        private Polygon polygon;
+        private Polygon mPolygon;
+
+        public static void LoadContent(ContentManager content)
+        {
+            mBase = content.Load<Texture2D>("board/base");
+            mEffect = content.Load<Effect>("board/shader");
+            mWirering = content.Load<Texture2D>("board/wirering");
+        }
 
         public Board()
         {
@@ -38,8 +48,6 @@ namespace Electronica.Circuits.Modules
             mVertices.Add(new Vector2(StandardBoardSize, -StandardBoardSize));
 
             UpdateBuffers();
-
-            mBasicEffect = new BasicEffect(StateManager.CurrentState.Graphics.GraphicsDevice);
         }
 
         /// <summary>
@@ -50,17 +58,16 @@ namespace Electronica.Circuits.Modules
         /// <param name="view">The view matrix of the camera.</param>
         public void Draw(GraphicsDeviceManager graphics, Camera camera, Matrix parentTransform)
         {
-            mBasicEffect.EnableDefaultLighting();
-            mBasicEffect.World = parentTransform;
-            mBasicEffect.View = camera.ViewMatrix;
-            mBasicEffect.Projection = camera.ProjectionMatrix;
-            mBasicEffect.AmbientLightColor = new Vector3(0.5f, 0.5f, 0.5f);
-            mBasicEffect.VertexColorEnabled = true;
+            mEffect.Parameters["World"].SetValue(parentTransform);
+            mEffect.Parameters["View"].SetValue(camera.ViewMatrix);
+            mEffect.Parameters["Projection"].SetValue(camera.ProjectionMatrix);
+            mEffect.Parameters["ModelTexture"].SetValue(mBase);
+            mEffect.Parameters["BrightnessMap"].SetValue(mWirering);
 
             graphics.GraphicsDevice.Indices = mIndexBuffer;
             graphics.GraphicsDevice.SetVertexBuffer(mVertexBuffer);
 
-            foreach (EffectPass pass in mBasicEffect.CurrentTechnique.Passes)
+            foreach (EffectPass pass in mEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 graphics.GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, mIndexCount / 3);
@@ -76,9 +83,9 @@ namespace Electronica.Circuits.Modules
             mVertexCount = mesh.vertexArray.Length;
             mIndexCount = mesh.indexArray.Length;
 
-            polygon = mesh.polygon;
+            mPolygon = mesh.polygon;
 
-            mVertexBuffer = new VertexBuffer(StateManager.CurrentState.Graphics.GraphicsDevice, VertexPositionColor.VertexDeclaration, mVertexCount, BufferUsage.WriteOnly);
+            mVertexBuffer = new VertexBuffer(StateManager.CurrentState.Graphics.GraphicsDevice, VertexPositionDualTexture.VertexDeclaration, mVertexCount, BufferUsage.WriteOnly);
             mVertexBuffer.SetData(mesh.vertexArray);
 
             mIndexBuffer = new IndexBuffer(StateManager.CurrentState.Graphics.GraphicsDevice, typeof(short), mIndexCount, BufferUsage.WriteOnly);
@@ -95,7 +102,7 @@ namespace Electronica.Circuits.Modules
             if (point.Y > 0 || point.Y < -Thickness)
                 return false;
 
-            return polygon.IsPointInside(new Poly2Tri.Triangulation.TriangulationPoint(point.X, point.Z));
+            return mPolygon.IsPointInside(new Poly2Tri.Triangulation.TriangulationPoint(point.X, point.Z));
         }
     }
 }

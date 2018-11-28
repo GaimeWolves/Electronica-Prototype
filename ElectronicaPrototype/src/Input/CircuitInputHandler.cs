@@ -14,11 +14,18 @@ using Microsoft.Xna.Framework.Input;
 
 namespace Electronica.Input
 {
+    public enum InputState
+    {
+        View,
+        Selected,
+        Adding
+    }
+
     public class CircuitInputHandler
     {
         private Camera mCurrentCam;
         private CircuitHandler mCircuithandler;
-        private Vector2 dragPosition;
+        private InputState mInputState;
 
         public Module ModulePick { get; private set; }
 
@@ -27,8 +34,8 @@ namespace Electronica.Input
             mCurrentCam = camera;
             mCircuithandler = circuitHandler;
             ModulePick = new AND(Vector2.Zero, 0);
-            dragPosition = Vector2.Zero;
             InputHandler.FixedMousePosDrag = true;
+            mInputState = InputState.View;
         }
 
         public void HandleInput(GameTime gameTime, GraphicsDeviceManager graphics)
@@ -36,22 +43,25 @@ namespace Electronica.Input
             if (InputHandler.IsKeyJustPressed(Keys.Escape))
                 Main.Close();
 
-            if (InputHandler.IsKeyJustPressed(Keys.Space))
-                if (InputHandler.IsMouseAnchored())
-                    InputHandler.ReleaseAnchor();
-                else
-                    InputHandler.SetAnchor(graphics.GraphicsDevice.Viewport.Width / 2, graphics.GraphicsDevice.Viewport.Height / 2);
-
             if (InputHandler.IsKeyJustPressed(Keys.F1))
+            {
+                mInputState = InputState.Selected;
                 mCurrentCam.InputMode = new TargetedMovement();
+            }
 
             if (InputHandler.IsKeyJustPressed(Keys.F2))
+            {
+                mInputState = InputState.View;
                 mCurrentCam.InputMode = new FreeMovement();
+            }
 
             if (InputHandler.IsKeyJustPressed(Keys.F3))
+            {
+                mInputState = InputState.Adding;
                 mCurrentCam.InputMode = new KeyboardMovement();
+            }
 
-            if (mCurrentCam.InputMode is FreeMovement)
+            if (mInputState is InputState.View)
             {
                 if (InputHandler.IsMouseButtonPressed(MouseButton.Right))
                 {
@@ -59,7 +69,7 @@ namespace Electronica.Input
                     //mActiveCircuit.Rotate(-InputHandler.DeltaMousePosition.X * deltaTime * 0.1f, rotation.X, rotation.Y);
                 }
             }
-            else if (mCurrentCam.InputMode is KeyboardMovement)
+            else if (mInputState is InputState.Adding)
             {
                 if (InputHandler.IsMouseButtonPressed(MouseButton.Right))
                     ModulePick.Rotate(InputHandler.DeltaMousePosition.X * 0.01f);

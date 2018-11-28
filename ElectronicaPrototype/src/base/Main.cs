@@ -1,4 +1,5 @@
-﻿using Electronica.Input;
+﻿using Electronica.Circuits.Modules;
+using Electronica.Input;
 using Electronica.States;
 
 using Microsoft.Xna.Framework;
@@ -52,6 +53,8 @@ namespace Electronica.Base
         protected override void LoadContent()
         {
             mSpriteBatch = new SpriteBatch(GraphicsDevice);
+
+            Board.LoadContent(Content);
 
             mStateManager = new StateManager(new StateGame(), mGraphics);
         }

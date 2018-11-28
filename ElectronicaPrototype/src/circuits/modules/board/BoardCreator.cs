@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
-
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Electronica.Utils;
+using Electronica.Utils.VertexDeclarations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -16,7 +19,7 @@ namespace Electronica.Circuits.Modules
     public struct Mesh
     {
         public Polygon polygon;
-        public VertexPositionColor[] vertexArray;
+        public VertexPositionDualTexture[] vertexArray;
         public short[] indexArray;
     }
 
@@ -73,15 +76,40 @@ namespace Electronica.Circuits.Modules
 
             vertices.AddRange(lowerVertices);
 
-            VertexPositionColor[] vertexArray = new VertexPositionColor[vertices.Count];
-
-            for (int i = 0; i < vertices.Count; i++)
-                vertexArray[i] = new VertexPositionColor(vertices[i], Color.DarkGreen);
-
-            mesh.vertexArray = vertexArray;
+            mesh.vertexArray = CreateUVMap(vertices);
             mesh.polygon = polygon;
 
             return mesh;
+        }
+
+        /// <summary>
+        /// Creates the VertexPositionTexture array and uv maps the vertices.
+        /// </summary>
+        /// <param name="vertices">The vertices to map.</param>
+        /// <returns>The VertexPositionTexture array.</returns>
+        private static VertexPositionDualTexture[] CreateUVMap(List<Vector3> vertices)
+        {
+            VertexPositionDualTexture[] vertexArray = new VertexPositionDualTexture[vertices.Count];
+
+            float minX = vertices.OrderBy(v => v.X).ToArray()[0].X;
+            float minZ = vertices.OrderBy(v => v.X).ToArray()[0].Z;
+
+            float maxX = vertices.OrderByDescending(v => v.X).ToArray()[0].X;
+            float maxZ = vertices.OrderByDescending(v => v.X).ToArray()[0].Z;
+
+            float absX = Math.Abs(minX);
+            float absZ = Math.Abs(maxZ);
+
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                VertexPositionDualTexture vertex = new VertexPositionDualTexture();
+                vertex.Position = vertices[i];
+                vertex.Texture1 = new Vector2(vertices[i].X + absX, vertices[i].Z + absZ);
+                vertex.Texture2 = new Vector2(MathUtils.NormalizeData(minX, maxX, vertices[i].X), MathUtils.NormalizeData(minZ, maxZ, vertices[i].Z));
+                vertexArray[i] = vertex;
+            }
+
+            return vertexArray;
         }
 
         /// <summary>

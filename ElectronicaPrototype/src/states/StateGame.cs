@@ -24,11 +24,6 @@ namespace Electronica.States
             mCamera.Position = new Vector3(0, 5, -10);
             mCamera.Direction = new Vector3(0, -3.5f, 5);
 
-            LoadContent();
-        }
-
-        private protected override void LoadContent()
-        {
             mCircuitHandler = new CircuitHandler();
             mInputHandler = new CircuitInputHandler(mCamera, mCircuitHandler);
         }
